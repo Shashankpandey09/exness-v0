@@ -1,0 +1,56 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          Int          @id @default(autoincrement())
+  username    String       @unique
+  password    String
+  usd_balance Decimal      @db.Decimal(18, 2)
+  trades      UserTrades[]
+}
+
+model Trade {
+  time        DateTime @db.Timestamptz(6)
+  symbol      String
+  price       Decimal  @db.Decimal(18, 8)
+  size        Decimal  @db.Decimal(18, 8)
+  side        String?
+  exchange_id String?
+
+  @@id([symbol, time])
+  @@index([symbol])
+  @@map("trades")
+}
+
+model Asset {
+  id        Int          @id @default(autoincrement())
+  symbol    String       @unique
+  buyPrice  Decimal      @db.Decimal(18, 4)
+  sellPrice Decimal      @db.Decimal(18, 4)
+  decimals  Int
+  trades    UserTrades[]
+}
+
+model UserTrades {
+  id         String   @id @default(uuid())
+  userId     Int
+  assetId    Int
+  type       String
+  margin     Decimal  @db.Decimal(18, 2)
+  leverage   Int
+  openPrice  Decimal  @db.Decimal(18, 4)
+  closePrice Decimal? @db.Decimal(18, 4)
+  pnl        Decimal? @db.Decimal(18, 4)
+  status     String   @default("open")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  asset      Asset    @relation(fields: [assetId], references: [id])
+  user       User     @relation(fields: [userId], references: [id])
+}
