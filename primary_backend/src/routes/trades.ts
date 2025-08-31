@@ -161,9 +161,10 @@ tradesRouter.post(
       const sign = trade.type === "buy" ? +1 : -1;
       const pnl = sign * (exit - entry) * qty;
       //if pnl is less basically loss is greater than 0.9 percent of margin close the trades
-      const new_Balance = (
+      const Balance = Number(
         await PriceStore.getInstance().getUserBalance(Number(req.userId))
-      ).toFixed(4);
+      )
+      const new_Balance=Balance+margin+pnl
       await prisma.$transaction(async (ctx) => {
         await ctx.userTrades.update({
           where: { id },
