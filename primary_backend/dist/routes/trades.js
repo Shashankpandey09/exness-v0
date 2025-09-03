@@ -96,6 +96,7 @@ exports.tradesRouter.get("/open", Authenticate_1.authenticate, (req, res) => __a
     try {
         const data = yield prisma_1.prisma.userTrades.findMany({
             where: { status: "open" },
+            include: { asset: { select: { symbol: true } } },
         });
         const filteredData = data.map((r) => ({
             orderId: r.id,
@@ -103,6 +104,7 @@ exports.tradesRouter.get("/open", Authenticate_1.authenticate, (req, res) => __a
             margin: r.margin, // decimal is 2, so this means 500$
             leverage: r.leverage, // so the user is trying to buy $5000 of exposure
             openPrice: r.openPrice,
+            symbol: r.asset.symbol
         }));
         return res.json({ trades: filteredData }).status(200);
     }
@@ -116,6 +118,7 @@ exports.tradesRouter.get("/closed", Authenticate_1.authenticate, (req, res) => _
     try {
         const data = yield prisma_1.prisma.userTrades.findMany({
             where: { status: "closed" },
+            include: { asset: { select: { symbol: true } } },
         });
         const filteredData = data.map((r) => ({
             orderId: r.id,
@@ -123,6 +126,7 @@ exports.tradesRouter.get("/closed", Authenticate_1.authenticate, (req, res) => _
             margin: r.margin, // decimal is 2, so this means 500$
             leverage: r.leverage, // so the user is trying to buy $5000 of exposure
             openPrice: r.closePrice,
+            symbol: r.asset.symbol
         }));
         return res.json({ trades: filteredData }).status(200);
     }
